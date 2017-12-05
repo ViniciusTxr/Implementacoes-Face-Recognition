@@ -66,8 +66,8 @@ known_names, known_face_encodings = scan_known_people("./conhecidos")
 face_locations = []
 face_encodings = []
 face_names = []
-process_this_frame = True
 frame_number = 0
+process_this_frame = 1
 
 while True:
     # Grab a single frame of video
@@ -78,13 +78,15 @@ while True:
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
     # Only process every other frame of video to save time
-    if process_this_frame:
+    if ((process_this_frame%10) == 0):
+        process_this_frame = 1
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(small_frame)
         face_encodings = face_recognition.face_encodings(small_frame, face_locations)
 
+        
         if (len(face_locations) == 0):
-        		time.sleep(.35)
+            time.sleep(.30)
 
         face_names = []
         for face_encoding in face_encodings:
@@ -104,7 +106,8 @@ while True:
                 face_names.append(name)
 
 
-    process_this_frame = not process_this_frame
+    process_this_frame += 1
+
 
 
     # Display the results
@@ -124,8 +127,10 @@ while True:
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.7, (255, 255, 255), 1)
 
 
-    print("Escrevendo frame {}".format(frame_number))
-    output_movie.write(frame)
+    if ((process_this_frame%3) == 0):
+        #time.sleep(1)
+        print("Escrevendo frame {}".format(frame_number))
+        output_movie.write(frame)
 
 
     # Display the resulting image

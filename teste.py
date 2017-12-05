@@ -93,6 +93,8 @@ while True:
             if flag == 0:
                 face_names.append(name)
 
+    print(process_this_frame)
+
 
     process_this_frame = not process_this_frame
 

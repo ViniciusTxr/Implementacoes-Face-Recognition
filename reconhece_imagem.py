@@ -54,9 +54,7 @@ face_names = []
 
 
 
-imag = cv2.imread("./desconhecidos/desc15.jpg")
-image = cv2.cvtColor(imag, cv2.COLOR_BGR2GRAY)
-cv2.imshow('image', imag)
+image = cv2.imread("./desconhecidos/algar.jpg")
 
 
 face_locations = face_recognition.face_locations(image)
@@ -74,7 +72,7 @@ while x:
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
         match = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.50)
-        name = "Desconhecido"
+        name = "N/C"
         flag = 0
         
         for i in range(0,len(known_names)):
