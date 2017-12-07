@@ -3,17 +3,10 @@ import cv2
 import os
 import re
 
-# This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
-# other example, but it includes some basic performance tweaks to make things run a lot faster:
-#   1. Process each video frame at 1/4 resolution (though still display it at full resolution)
-#   2. Only detect faces in every other frame of video.
 
-# PLEASE NOTE: This example requires OpenCV (the `cv2` library) to be installed only to read from your webcam.
-# OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
-# specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
+#-----------------------------------------------------------------------
 
-# Get a reference to webcam #0 (the default one)
-
+#função para encontrar todas as faces em uma pasta
 def scan_known_people(known_people_folder):
     known_names = []
     known_face_encodings = []
@@ -36,51 +29,49 @@ def scan_known_people(known_people_folder):
 
 
 
+#-----------------------------------------------------------------------
+
+
+
 def image_files_in_folder(folder):
     return [os.path.join(folder, f) for f in os.listdir(folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
 
 
 
+#-----------------------------------------------------------------------
+
+
+
+# pega por referencia #0 que é o padrao para webcam
 video_capture = cv2.VideoCapture(0)
-#video_capture.set(3,320);
-#video_capture.set(4,240);
-#camcapture.set(cv2.cv.CV_CAP_PROP_FPS,60)
 
-#larg = int(video_capture.get(3))  
-#alt = int(video_capture.get(4))
-
-#print(larg, alt)
-
-# Create an output movie file (make sure resolution/frame rate matches input video!)
-
-# Load a sample picture and learn how to recognize it.
-
+# carrega as faces conhecidas em uma base de imagens conhecidas
 known_names, known_face_encodings = scan_known_people("./conhecidos")
 
-# Initialize some variables
 face_locations = []
 face_encodings = []
 face_names = []
 process_this_frame = 10
 
 while True:
-    # Grab a single frame of video
+    # pega um frame do video
     ret, frame = video_capture.read()
 
-
-    # Only process every other frame of video to save time
+    #processa um frame a cada 10 (com a finalidade de otimizar)
     if ((process_this_frame%10) == 0):
-        # Find all the faces and face encodings in the current frame of video
+    # Encontra todas as faces e as codificaçoes das faces no frame atual da webcam
         face_locations = face_recognition.face_locations(frame)
         face_encodings = face_recognition.face_encodings(frame, face_locations)
 
         face_names = []
         for face_encoding in face_encodings:
-            # See if the face is a match for the known face(s)
+            # ve se alguma face do frame é conhecida
+            #quanto menor a tolerancia, maior será a precisao
             match = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.55)
-            name = "Desconhecido"
+            name = "N/C"
             flag = 0
             
+             #associa o(s) rosto(s) encontrados ao(s) seu(s) respectivo(s) nome(s).
             for i in range(0,len(known_names)):
                 if match[i]:
                     name = known_names[i]
@@ -88,6 +79,7 @@ while True:
                     flag = 1
                     i = len(known_names)
 
+            #se nao encontrou nenhuma face conhecida, entao marca ela com 'N/C' = nao conhecido
             if flag == 0:
                 face_names.append(name)
 
@@ -95,30 +87,25 @@ while True:
     process_this_frame += 1
 
 
-    # Display the results
+    # Mostra os resultados
     for (top, right, bottom, left), name in zip(face_locations, face_names):
-        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-        top *= 1
-        right *= 1
-        bottom *= 1
-        left *= 1
 
-        # Draw a box around the face
+        # desenha um quadrado em volta da face
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-        # Draw a label with a name below the face
+        # escreve o nome embaixo da face 
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.7, (255, 255, 255), 1)
 
-    # Display the resulting image
+    # mostra a imagem resultante na janela da webcam
     cv2.imshow('Video', frame)
 
-    # Hit 'q' on the keyboard to quit!
+    # apertar 'q' para encerrar
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release handle to the webcam
+#Encerra a webcam e fecha as janelas 
 video_capture.release()
 cv2.destroyAllWindows()
 
